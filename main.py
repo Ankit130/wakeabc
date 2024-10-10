@@ -1,38 +1,99 @@
-from fastapi import FastAPI, HTTPException
-from typing import List, Dict, Optional
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.responses import RedirectResponse
+from typing import List
 import requests
 from bs4 import BeautifulSoup
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-app = FastAPI(title="WakeABC Scraper API", 
-             description="API for scraping product information from WakeABC")
+app = FastAPI(
+    title="WakeABC Scraper API",
+    description="""
+    An API for searching and retrieving product information from WakeABC.
+    This API provides real-time product data including inventory levels across different stores.
+    """,
+    version="1.0.0",
+    openapi_tags=[{
+        "name": "products",
+        "description": "Operations with products and inventory"
+    }]
+)
+
+class SearchRequest(BaseModel):
+    query: str = Field(..., description="The search term to look for products")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "query": "Bourbon"
+            }
+        }
 
 class InventoryData(BaseModel):
-    store_address: str
-    quantity: str
+    store_address: str = Field(..., description="The physical address of the store")
+    quantity: str = Field(..., description="The quantity of product available in stock")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "store_address": "123 Main St, Anytown, USA",
+                "quantity": "5"
+            }
+        }
 
 class Product(BaseModel):
-    product_name: str
-    product_price: str
-    product_size: str
-    plu_number: str
-    inventory_data: List[InventoryData]
+    product_name: str = Field(..., description="The name of the product")
+    product_price: str = Field(..., description="The current price of the product")
+    product_size: str = Field(..., description="The size/volume of the product")
+    plu_number: str = Field(..., description="Product Look-Up (PLU) number")
+    inventory_data: List[InventoryData] = Field(..., description="Inventory levels across different stores")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "product_name": "Buffalo Trace Bourbon",
+                "product_price": "$29.99",
+                "product_size": "750ml",
+                "plu_number": "12345",
+                "inventory_data": [
+                    {
+                        "store_address": "123 Main St, Anytown, USA",
+                        "quantity": "5"
+                    }
+                ]
+            }
+        }
 
 class SearchResponse(BaseModel):
-    products: List[Product]
+    products: List[Product] = Field(..., description="List of products matching the search criteria")
 
-@app.post("/search", response_model=SearchResponse)
-async def search_products(query: str):
-    cookies = {
-        '_ga_WQZZR5YKCY': 'GS1.1.1728553989.2.1.1728554072.0.0.0',
-        '_ga': 'GA1.1.942739358.1728206527',
-        '_gauges_unique_month': '1',
-        '_gauges_unique_year': '1',
-        '_gauges_unique': '1',
-        '_gauges_unique_hour': '1',
-        '_gauges_unique_day': '1',
-    }
+@app.get("/")
+async def root():
+    """
+    Redirect to the API documentation page.
+    """
+    return RedirectResponse(url="/docs")
 
+@app.post("/search", 
+         response_model=SearchResponse,
+         tags=["products"],
+         summary="Search for products",
+         response_description="List of products matching the search criteria")
+async def search_products(search_request: SearchRequest):
+    """
+    Search for products in the WakeABC database.
+
+    This endpoint scrapes the WakeABC website for product information based on the provided search term.
+    It returns detailed product information including inventory levels across different stores.
+
+    Args:
+        search_request: SearchRequest object containing the query parameter
+
+    Returns:
+        A SearchResponse object containing a list of products matching the search criteria
+
+    Raises:
+        HTTPException: If the external service is unavailable or returns an error
+    """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
@@ -50,7 +111,7 @@ async def search_products(query: str):
     }
 
     data = {
-        'productSearch': query,
+        'productSearch': search_request.query,
     }
 
     try:
