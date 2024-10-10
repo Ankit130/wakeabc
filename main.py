@@ -94,6 +94,16 @@ async def search_products(search_request: SearchRequest):
     Raises:
         HTTPException: If the external service is unavailable or returns an error
     """
+    cookies = {
+        '_ga_WQZZR5YKCY': 'GS1.1.1728553989.2.1.1728554072.0.0.0',
+        '_ga': 'GA1.1.942739358.1728206527',
+        '_gauges_unique_month': '1',
+        '_gauges_unique_year': '1',
+        '_gauges_unique': '1',
+        '_gauges_unique_hour': '1',
+        '_gauges_unique_day': '1',
+    }
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',

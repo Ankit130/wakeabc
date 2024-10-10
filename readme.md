@@ -20,7 +20,7 @@ A FastAPI-based web scraper for WakeABC product information. This API allows you
 1. Clone the repository:
 ```bash
 git clone https://github.com/Ankit130/wakeabc
-cd wakeabc-scraper
+cd wakeabc
 ```
 
 2. Create a virtual environment:
@@ -136,3 +136,4 @@ The API uses Pydantic models for request/response validation:
 - `Product`: Represents a single product with all its details
 - `InventoryData`: Represents inventory information for a store
 - `SearchResponse`: Wraps the list of products in the response
+
