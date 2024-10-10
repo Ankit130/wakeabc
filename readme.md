@@ -16,8 +16,8 @@ A FastAPI-based web scraper for WakeABC product information.
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd wakeabc-scraper
+git clone https://github.com/Ankit130/wakeabc
+cd wakeabc
 ```
 
 2. Create a virtual environment:
@@ -87,6 +87,4 @@ The API includes proper error handling for:
 - Invalid input data
 - Server errors
 
-## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
